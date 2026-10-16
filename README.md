@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Fintelligence 
 
-## Getting Started
+**AI-Powered Personal Finance Dashboard**
 
-First, run the development server:
+Fintelligence is a personal finance management web application designed to help users track income and expenses, manage budgets, analyze spending habits, and receive AI-powered financial insights.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+##  Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Dashboard** — View financial summaries and recent transactions.
+- **Transaction Management** — Track income and expenses.
+- **Budget Management** — Set budgets and monitor spending.
+- **Financial Analytics** — Analyze income, expenses, savings, and spending categories.
+- **AI Financial Assistant** — Ask questions about spending habits and get personalized suggestions.
+- **Settings** — Customize your profile, currency display, and monthly budget.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+##  Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Frontend**
+- Next.js
+- React
+- JavaScript
+- Tailwind CSS
 
-## Learn More
+**Backend**
+- Python
+- FastAPI
+- Google Gemini API
 
-To learn more about Next.js, take a look at the following resources:
+**Storage**
+- Browser LocalStorage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+##  Getting Started
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
 
-## Deploy on Vercel
+- Node.js and npm
+- Python 3.10+
+- Google Gemini API key
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+##  How It Works
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Record your income and expenses.
+2. Set a monthly spending limit and category budgets.
+3. Review your financial dashboard and analytics.
+4. Use the AI Assistant to explore spending patterns and saving strategies.
+
+## Data & Privacy
+
+Transaction, budget, and settings data are stored in browser LocalStorage. AI features may send relevant information to the backend and the configured AI provider for processing.
+
+This project is intended for personal finance tracking and educational purposes. AI-generated suggestions should not be treated as professional financial advice.
+
+##  Future Improvements
+- User authentication and cloud data storage
+- Interactive financial charts
+- Improved transaction filtering and reporting
+- Enhanced AI-powered financial recommendations
+
+
+
+*Built with Next.js, FastAPI, and AI to make personal finance easier to understand.*
