@@ -1,4 +1,3 @@
-
 "use client";
 
 import AppNavigation from "@/components/AppNavigation";
@@ -29,6 +28,27 @@ const CURRENCIES = {
   EUR: { label: "EUR — Euro (€)", symbol: "€" },
   GBP: { label: "GBP — British Pound (£)", symbol: "£" },
 };
+
+// Design tokens (Pinterest-style pastel boards, light + dark)
+const TILE_BASE =
+  "rounded-[28px] p-6 transition duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#1E1B3A]/10";
+
+const TONES = {
+  surface:
+    "bg-white ring-1 ring-[#E4E0F0] dark:bg-[#201D3D] dark:ring-[#34305A]",
+  peach: "bg-[#FFE3D6] dark:bg-[#4A2E33]",
+  mint: "bg-[#D5F3E6] dark:bg-[#1F4437]",
+  sky: "bg-[#D8EAFE] dark:bg-[#1F3555]",
+  lilac: "bg-[#E6DDFB] dark:bg-[#3A2F66]",
+  butter: "bg-[#FFF1C2] dark:bg-[#4A4122]",
+};
+
+const MUTED = "text-[#6B6885] dark:text-[#A9A5C7]";
+const GOOD = "text-[#0F7A5F] dark:text-[#6FE3C0]";
+const BAD = "text-[#C2263A] dark:text-[#FF8A93]";
+
+const FIELD =
+  "w-full rounded-2xl border border-[#E4E0F0] bg-white px-4 py-3 outline-none focus:border-[#E60023] dark:border-[#34305A] dark:bg-[#15132A]";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -111,198 +131,206 @@ export default function SettingsPage() {
 
   if (!loaded) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#0B1014] text-gray-300">
+      <main className="flex min-h-screen items-center justify-center bg-[#F5F3FA] text-[#6B6885] dark:bg-[#15132A] dark:text-[#A9A5C7]">
         Loading settings...
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0B1014] px-5 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-[#F5F3FA] px-5 py-8 text-[#1E1B3A] dark:bg-[#15132A] dark:text-[#F1EFFB] md:px-8">
       <AppNavigation />
 
       <div className="mx-auto max-w-4xl">
-        <header className="mb-9 flex items-center gap-3">
+        <header className="mb-9 flex items-center gap-4">
           <Link
             href="/"
-            className="rounded-xl border border-white/10 p-2.5 text-gray-300 hover:bg-white/10"
+            className="rounded-full bg-white p-3 text-[#1E1B3A] shadow-sm ring-1 ring-[#E4E0F0] transition hover:scale-105 hover:shadow-md dark:bg-[#201D3D] dark:text-[#F1EFFB] dark:ring-[#34305A]"
             aria-label="Back to dashboard"
           >
             <ArrowLeft size={19} />
           </Link>
 
           <div>
-            <p className="text-sm text-[#83D9B0]">FINTELLIGENCE</p>
-            <h1 className="mt-1 text-2xl font-semibold md:text-3xl">
+            <p className="text-sm font-bold tracking-wide text-[#E60023]">FINTELLIGENCE</p>
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight md:text-4xl">
               Settings
             </h1>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className={`mt-1 text-sm ${MUTED}`}>
               Customize your finance dashboard.
             </p>
           </div>
         </header>
 
-        <form onSubmit={handleSave} className="space-y-6">
-          {/* Profile */}
-          <section className="rounded-2xl border border-white/10 bg-[#121A20] p-6">
-            <div className="mb-6 flex items-center gap-3">
-              <UserRound className="text-[#83D9B0]" size={21} />
-              <div>
-                <h2 className="font-semibold">Profile</h2>
-                <p className="text-sm text-gray-400">
-                  Personalize your experience.
-                </p>
-              </div>
-            </div>
-
-            <label
-              htmlFor="displayName"
-              className="mb-2 block text-sm text-gray-300"
-            >
-              Display name
-            </label>
-
-            <input
-              id="displayName"
-              type="text"
-              maxLength={60}
-              value={settings.name}
-              onChange={(e) => updateSetting("name", e.target.value)}
-              placeholder="Enter your name"
-              className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
-            />
-          </section>
-
-          {/* Finance Preferences */}
-          <section className="rounded-2xl border border-white/10 bg-[#121A20] p-6">
-            <div className="mb-6 flex items-center gap-3">
-              <Wallet className="text-[#83D9B0]" size={21} />
-              <div>
-                <h2 className="font-semibold">Finance Preferences</h2>
-                <p className="text-sm text-gray-400">
-                  Choose your preferred currency and budget.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="currency"
-                  className="mb-2 block text-sm text-gray-300"
-                >
-                  Currency
-                </label>
-
-                <select
-                  id="currency"
-                  value={settings.currency}
-                  onChange={(e) =>
-                    updateSetting("currency", e.target.value)
-                  }
-                  className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
-                >
-                  {Object.entries(CURRENCIES).map(([code, currency]) => (
-                    <option key={code} value={code}>
-                      {currency.label}
-                    </option>
-                  ))}
-                </select>
-
-                <p className="mt-2 text-xs text-gray-500">
-                  Currency preference: {settings.currency} ({currencySymbol}).
-                  Existing amounts are not converted.
-                </p>
+        <form onSubmit={handleSave}>
+          {/* Pinterest-style masonry board */}
+          <div className="columns-1 gap-5 sm:columns-2 [&>*]:mb-5 [&>*]:break-inside-avoid">
+            {/* Profile */}
+            <section className={`${TILE_BASE} ${TONES.lilac}`}>
+              <div className="mb-6 flex items-center gap-3">
+                <IconBubble>
+                  <UserRound size={21} />
+                </IconBubble>
+                <div>
+                  <h2 className="font-bold">Profile</h2>
+                  <p className={`text-sm ${MUTED}`}>
+                    Personalize your experience.
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="monthlyBudget"
-                  className="mb-2 block text-sm text-gray-300"
-                >
-                  Monthly budget ({currencySymbol})
-                </label>
-
-                <input
-                  id="monthlyBudget"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
-                  value={settings.monthlyBudget}
-                  onChange={(e) =>
-                    updateSetting("monthlyBudget", e.target.value)
-                  }
-                  className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
-                />
-
-                <p className="mt-2 text-xs text-gray-500">
-                  Your preferred monthly spending limit.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Notifications */}
-          <section className="rounded-2xl border border-white/10 bg-[#121A20] p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <Bell className="text-[#83D9B0]" size={21} />
-              <div>
-                <h2 className="font-semibold">Notifications</h2>
-                <p className="text-sm text-gray-400">
-                  Manage your budget reminder preference.
-                </p>
-              </div>
-            </div>
-
-            <label className="flex cursor-pointer items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium">Budget reminders</p>
-                <p className="mt-1 text-sm text-gray-400">
-                  Enable budget reminder alerts where supported.
-                </p>
-              </div>
+              <label
+                htmlFor="displayName"
+                className="mb-2 block text-sm font-semibold"
+              >
+                Display name
+              </label>
 
               <input
-                type="checkbox"
-                checked={settings.notifications}
-                onChange={(e) =>
-                  updateSetting("notifications", e.target.checked)
-                }
-                className="h-5 w-5 accent-[#83D9B0]"
+                id="displayName"
+                type="text"
+                maxLength={60}
+                value={settings.name}
+                onChange={(e) => updateSetting("name", e.target.value)}
+                placeholder="Enter your name"
+                className={FIELD}
               />
-            </label>
+            </section>
 
-            <p className="mt-4 text-xs text-gray-500">
-              This saves your preference. Automatic browser notifications
-              require additional notification logic.
-            </p>
-          </section>
-
-          {/* Privacy */}
-          <section className="rounded-2xl border border-white/10 bg-[#121A20] p-6">
-            <div className="flex items-start gap-3">
-              <ShieldCheck
-                className="mt-1 shrink-0 text-[#83D9B0]"
-                size={21}
-              />
-
-              <div>
-                <h2 className="font-semibold">Privacy</h2>
-                <p className="mt-2 text-sm leading-6 text-gray-400">
-                  Your settings are stored in this browser using
-                  LocalStorage. They are not synced across accounts or
-                  devices, and there is no cloud backup.
-                </p>
+            {/* Finance Preferences */}
+            <section className={`${TILE_BASE} ${TONES.peach}`}>
+              <div className="mb-6 flex items-center gap-3">
+                <IconBubble>
+                  <Wallet size={21} />
+                </IconBubble>
+                <div>
+                  <h2 className="font-bold">Finance Preferences</h2>
+                  <p className={`text-sm ${MUTED}`}>
+                    Choose your preferred currency and budget.
+                  </p>
+                </div>
               </div>
-            </div>
-          </section>
+
+              <div className="grid gap-5">
+                <div>
+                  <label
+                    htmlFor="currency"
+                    className="mb-2 block text-sm font-semibold"
+                  >
+                    Currency
+                  </label>
+
+                  <select
+                    id="currency"
+                    value={settings.currency}
+                    onChange={(e) =>
+                      updateSetting("currency", e.target.value)
+                    }
+                    className={FIELD}
+                  >
+                    {Object.entries(CURRENCIES).map(([code, currency]) => (
+                      <option key={code} value={code}>
+                        {currency.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <p className={`mt-2 text-xs ${MUTED}`}>
+                    Currency preference: {settings.currency} ({currencySymbol}).
+                    Existing amounts are not converted.
+                  </p>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="monthlyBudget"
+                    className="mb-2 block text-sm font-semibold"
+                  >
+                    Monthly budget ({currencySymbol})
+                  </label>
+
+                  <input
+                    id="monthlyBudget"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    required
+                    value={settings.monthlyBudget}
+                    onChange={(e) =>
+                      updateSetting("monthlyBudget", e.target.value)
+                    }
+                    className={FIELD}
+                  />
+
+                  <p className={`mt-2 text-xs ${MUTED}`}>
+                    Your preferred monthly spending limit.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Notifications */}
+            <section className={`${TILE_BASE} ${TONES.mint}`}>
+              <div className="mb-5 flex items-center gap-3">
+                <IconBubble>
+                  <Bell size={21} />
+                </IconBubble>
+                <div>
+                  <h2 className="font-bold">Notifications</h2>
+                  <p className={`text-sm ${MUTED}`}>
+                    Manage your budget reminder preference.
+                  </p>
+                </div>
+              </div>
+
+              <label className="flex cursor-pointer items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold">Budget reminders</p>
+                  <p className={`mt-1 text-sm ${MUTED}`}>
+                    Enable budget reminder alerts where supported.
+                  </p>
+                </div>
+
+                <input
+                  type="checkbox"
+                  checked={settings.notifications}
+                  onChange={(e) =>
+                    updateSetting("notifications", e.target.checked)
+                  }
+                  className="h-6 w-6 shrink-0 accent-[#E60023]"
+                />
+              </label>
+
+              <p className={`mt-4 text-xs ${MUTED}`}>
+                This saves your preference. Automatic browser notifications
+                require additional notification logic.
+              </p>
+            </section>
+
+            {/* Privacy */}
+            <section className={`${TILE_BASE} ${TONES.sky}`}>
+              <div className="flex items-start gap-3">
+                <IconBubble>
+                  <ShieldCheck size={21} />
+                </IconBubble>
+
+                <div>
+                  <h2 className="font-bold">Privacy</h2>
+                  <p className={`mt-2 text-sm leading-6 ${MUTED}`}>
+                    Your settings are stored in this browser using
+                    LocalStorage. They are not synced across accounts or
+                    devices, and there is no cloud backup.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
 
           {/* Save */}
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="mt-1 flex flex-wrap items-center gap-4">
             <button
               type="submit"
-              className="flex items-center gap-2 rounded-xl bg-[#83D9B0] px-5 py-3 font-semibold text-[#0B1014] transition hover:bg-[#9CE8C5]"
+              className="flex items-center gap-2 rounded-full bg-[#E60023] px-7 py-3 font-bold text-white shadow-sm transition hover:brightness-110"
             >
               <Save size={18} />
               Save Settings
@@ -311,7 +339,7 @@ export default function SettingsPage() {
             {saved && (
               <p
                 role="status"
-                className="flex items-center gap-2 text-sm text-[#83D9B0]"
+                className={`flex items-center gap-2 text-sm font-semibold ${GOOD}`}
               >
                 <CheckCircle2 size={17} />
                 Settings saved successfully!
@@ -319,17 +347,25 @@ export default function SettingsPage() {
             )}
 
             {error && (
-              <p role="alert" className="text-sm text-rose-400">
+              <p role="alert" className={`text-sm font-semibold ${BAD}`}>
                 {error}
               </p>
             )}
           </div>
         </form>
 
-        <p className="mt-6 text-xs text-gray-500">
+        <p className={`mt-6 text-xs ${MUTED}`}>
           Fintelligence · Your Money, Smarter.
         </p>
       </div>
     </main>
+  );
+}
+
+function IconBubble({ children }) {
+  return (
+    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/70 text-[#1E1B3A] shadow-sm dark:bg-white/10 dark:text-[#F1EFFB]">
+      {children}
+    </span>
   );
 }

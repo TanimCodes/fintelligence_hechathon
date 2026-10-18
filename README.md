@@ -59,3 +59,4 @@ This project is intended for personal finance tracking and educational purposes.
 
 
 *Built with Next.js, FastAPI, and AI to make personal finance easier to understand.*
+# fintelligence

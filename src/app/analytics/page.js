@@ -17,6 +17,34 @@ import {
 const STORAGE_KEY = "fintelligence-transactions-v1";
 const API_URL = "http://127.0.0.1:8000/analyze";
 
+// Design tokens (Pinterest-style pastel boards, light + dark)
+const TILE_BASE =
+  "rounded-[28px] p-6 transition duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#1E1B3A]/10";
+
+const TONES = {
+  surface:
+    "bg-white ring-1 ring-[#E4E0F0] dark:bg-[#201D3D] dark:ring-[#34305A]",
+  peach: "bg-[#FFE3D6] dark:bg-[#4A2E33]",
+  mint: "bg-[#D5F3E6] dark:bg-[#1F4437]",
+  sky: "bg-[#D8EAFE] dark:bg-[#1F3555]",
+  lilac: "bg-[#E6DDFB] dark:bg-[#3A2F66]",
+  butter: "bg-[#FFF1C2] dark:bg-[#4A4122]",
+};
+
+const MUTED = "text-[#6B6885] dark:text-[#A9A5C7]";
+const GOOD = "text-[#0F7A5F] dark:text-[#6FE3C0]";
+const BAD = "text-[#C2263A] dark:text-[#FF8A93]";
+
+const CATEGORY_COLORS = [
+  "#E8505B",
+  "#7C6BEA",
+  "#2FBF9B",
+  "#F2B33D",
+  "#4A90E2",
+  "#F27BB0",
+  "#8D8AA8",
+];
+
 function getAmount(transaction) {
   const amount = Number(transaction?.amount);
   return Number.isFinite(amount) ? amount : 0;
@@ -190,156 +218,162 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B1014] px-5 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-[#F5F3FA] px-5 py-8 text-[#1E1B3A] dark:bg-[#15132A] dark:text-[#F1EFFB] md:px-8">
       <AppNavigation />
 
       <div className="mx-auto max-w-7xl">
-        <header className="mb-9 flex items-center gap-3">
+        <header className="mb-9 flex items-center gap-4">
           <Link
             href="/"
             aria-label="Back to dashboard"
-            className="rounded-xl border border-white/10 p-2.5 text-gray-300 transition hover:bg-white/10"
+            className="rounded-full bg-white p-3 text-[#1E1B3A] shadow-sm ring-1 ring-[#E4E0F0] transition hover:scale-105 hover:shadow-md dark:bg-[#201D3D] dark:text-[#F1EFFB] dark:ring-[#34305A]"
           >
             <ArrowLeft size={19} />
           </Link>
 
           <div>
-            <p className="text-sm text-[#83D9B0]">FINTELLIGENCE</p>
-            <h1 className="mt-1 text-2xl font-semibold md:text-3xl">
+            <p className="text-sm font-bold tracking-wide text-[#E60023]">FINTELLIGENCE</p>
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight md:text-4xl">
               Analytics
             </h1>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className={`mt-1 text-sm ${MUTED}`}>
               Understand your income and spending.
             </p>
           </div>
         </header>
 
-        {/* Python backend status */}
-        <section className="mb-6 rounded-2xl border border-white/10 bg-[#121A20] p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="font-medium">Python Financial Analysis</p>
-              <p className="mt-1 text-sm text-gray-400">
-                Powered by FastAPI, Pandas and NumPy
-              </p>
-            </div>
+        {/* Pinterest-style masonry board */}
+        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 [&>*]:mb-5 [&>*]:break-inside-avoid">
+          {/* Python backend status */}
+          <section className={`${TILE_BASE} ${TONES.lilac}`}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-bold">Python Financial Analysis</p>
+                <p className={`mt-1 text-sm ${MUTED}`}>
+                  Powered by FastAPI, Pandas and NumPy
+                </p>
+              </div>
 
-            <span
-              className={`rounded-full px-3 py-1 text-xs ${
-                loading
-                  ? "bg-amber-400/10 text-amber-300"
-                  : analysis
-                    ? "bg-[#83D9B0]/10 text-[#83D9B0]"
-                    : analysisError
-                      ? "bg-rose-400/10 text-rose-300"
-                      : "bg-white/10 text-gray-400"
-              }`}
-            >
-              {loading
-                ? "Analyzing..."
-                : analysis
-                  ? "Analysis Ready"
-                  : analysisError
-                    ? "Connection Error"
-                    : transactions.length === 0
-                      ? "No Transactions"
-                      : "Waiting for Data"}
-            </span>
-          </div>
-
-          {analysisError && (
-            <div className="mt-4">
-              <p className="text-sm text-rose-400">{analysisError}</p>
-              <button
-                onClick={retryAnalysis}
-                disabled={loading || !transactionsLoaded || transactions.length === 0}
-                className="mt-3 inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  loading
+                    ? "bg-[#F2B33D]/30 text-[#8A5A00] dark:text-[#F2B33D]"
+                    : analysis
+                      ? "bg-[#2FBF9B]/25 text-[#0F7A5F] dark:text-[#6FE3C0]"
+                      : analysisError
+                        ? "bg-[#E8505B]/20 text-[#B3202C] dark:text-[#FF8A93]"
+                        : "bg-black/10 text-[#6B6885] dark:bg-white/10 dark:text-[#A9A5C7]"
+                }`}
               >
-                <RefreshCw
-                  size={15}
-                  className={loading ? "animate-spin" : ""}
-                />
-                Retry Connection
-              </button>
+                {loading
+                  ? "Analyzing..."
+                  : analysis
+                    ? "Analysis Ready"
+                    : analysisError
+                      ? "Connection Error"
+                      : transactions.length === 0
+                        ? "No Transactions"
+                        : "Waiting for Data"}
+              </span>
             </div>
-          )}
 
-          {!analysisError && transactionsLoaded && transactions.length === 0 && (
-            <p className="mt-4 text-sm text-gray-400">
-              Add transactions first to see your financial analysis.
-            </p>
-          )}
-        </section>
+            {analysisError && (
+              <div className="mt-4">
+                <p className={`text-sm font-medium ${BAD}`}>{analysisError}</p>
+                <button
+                  onClick={retryAnalysis}
+                  disabled={loading || !transactionsLoaded || transactions.length === 0}
+                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#E60023] px-5 py-2.5 text-sm font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <RefreshCw
+                    size={15}
+                    className={loading ? "animate-spin" : ""}
+                  />
+                  Retry Connection
+                </button>
+              </div>
+            )}
 
-        {/* Summary cards */}
-        <section className="mb-6 grid gap-4 md:grid-cols-3">
+            {!analysisError && transactionsLoaded && transactions.length === 0 && (
+              <p className={`mt-4 text-sm ${MUTED}`}>
+                Add transactions first to see your financial analysis.
+              </p>
+            )}
+          </section>
+
+          {/* Summary cards */}
           <SummaryCard
+            tone="mint"
             title="Total Income"
             amount={money(totalIncome)}
             icon={<TrendingUp size={20} />}
-            color="text-[#83D9B0]"
+            color={GOOD}
           />
 
           <SummaryCard
+            tone="sky"
             title="Total Expenses"
             amount={money(totalExpenses)}
             icon={<TrendingDown size={20} />}
-            color="text-rose-400"
+            color={BAD}
           />
 
           <SummaryCard
+            tone="peach"
             title="Net Balance"
             amount={money(netBalance)}
             icon={<Wallet size={20} />}
-            color={netBalance >= 0 ? "text-[#83D9B0]" : "text-rose-400"}
+            color={netBalance >= 0 ? GOOD : BAD}
           />
-        </section>
 
-        {/* Financial insights */}
-        <section className="mb-6 grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-white/10 bg-[#121A20] p-5">
+          {/* Financial insights */}
+          <div className={`${TILE_BASE} ${TONES.butter}`}>
             <div className="flex items-center gap-3">
-              <PiggyBank className="text-[#83D9B0]" size={21} />
+              <IconBubble>
+                <PiggyBank size={21} />
+              </IconBubble>
               <div>
-                <p className="text-sm text-gray-400">Savings Rate</p>
-                <h2 className="mt-1 text-2xl font-semibold">
+                <p className={`text-sm ${MUTED}`}>Savings Rate</p>
+                <h2 className="mt-1 text-3xl font-extrabold tracking-tight">
                   {income > 0 || analysis
                     ? `${Number(savingsRate).toFixed(2)}%`
                     : "—"}
                 </h2>
               </div>
             </div>
-            <p className="mt-3 text-sm text-gray-400">
+            <p className={`mt-4 text-sm ${MUTED}`}>
               Percentage of income remaining after expenses.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#121A20] p-5">
+          <div className={`${TILE_BASE} ${TONES.surface}`}>
             <div className="flex items-center gap-3">
-              <Target className="text-[#83D9B0]" size={21} />
+              <IconBubble>
+                <Target size={21} />
+              </IconBubble>
               <div>
-                <p className="text-sm text-gray-400">
+                <p className={`text-sm ${MUTED}`}>
                   Highest Expense Category
                 </p>
-                <h2 className="mt-1 break-words text-xl font-semibold">
+                <h2 className="mt-1 break-words text-2xl font-extrabold tracking-tight">
                   {topCategory}
                 </h2>
               </div>
             </div>
-            <p className="mt-3 text-sm text-gray-400">
+            <p className={`mt-4 text-sm ${MUTED}`}>
               Category with the highest total spending.
             </p>
           </div>
-        </section>
 
-        {/* Charts */}
-        <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-white/10 bg-[#121A20] p-6">
+          {/* Charts */}
+          <div className={`${TILE_BASE} ${TONES.surface}`}>
             <div className="mb-6 flex items-center gap-3">
-              <ChartNoAxesCombined className="text-[#83D9B0]" />
+              <IconBubble>
+                <ChartNoAxesCombined size={21} />
+              </IconBubble>
               <div>
-                <h2 className="font-semibold">Income vs Expenses</h2>
-                <p className="text-sm text-gray-400">
+                <h2 className="font-bold">Income vs Expenses</h2>
+                <p className={`text-sm ${MUTED}`}>
                   Based on your saved transactions
                 </p>
               </div>
@@ -353,21 +387,21 @@ export default function AnalyticsPage() {
                   label="Income"
                   amount={income}
                   max={Math.max(income, expenses, 1)}
-                  color="bg-[#83D9B0]"
+                  color="bg-[#2FBF9B]"
                 />
                 <Bar
                   label="Expenses"
                   amount={expenses}
                   max={Math.max(income, expenses, 1)}
-                  color="bg-rose-400"
+                  color="bg-[#E8505B]"
                 />
               </div>
             )}
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#121A20] p-6">
-            <h2 className="mb-1 font-semibold">Expenses by Category</h2>
-            <p className="mb-6 text-sm text-gray-400">
+          <div className={`${TILE_BASE} ${TONES.surface}`}>
+            <h2 className="mb-1 font-bold">Expenses by Category</h2>
+            <p className={`mb-6 text-sm ${MUTED}`}>
               Where your money goes
             </p>
 
@@ -375,20 +409,31 @@ export default function AnalyticsPage() {
               <EmptyState />
             ) : (
               <div className="space-y-5">
-                {categoryData.map(([category, amount]) => (
+                {categoryData.map(([category, amount], index) => (
                   <div key={category}>
                     <div className="mb-2 flex justify-between gap-3 text-sm">
-                      <span className="text-gray-300">{category}</span>
-                      <span className="font-medium">{money(amount)}</span>
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span
+                          className="h-3 w-3 shrink-0 rounded-full"
+                          style={{
+                            background:
+                              CATEGORY_COLORS[index % CATEGORY_COLORS.length],
+                          }}
+                        />
+                        <span className="truncate">{category}</span>
+                      </span>
+                      <span className="font-semibold">{money(amount)}</span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-2.5 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
                       <div
-                        className="h-full rounded-full bg-[#83D9B0] transition-all"
+                        className="h-full rounded-full transition-all"
                         style={{
                           width: `${Math.min(
                             (amount / maxCategory) * 100,
                             100
                           )}%`,
+                          background:
+                            CATEGORY_COLORS[index % CATEGORY_COLORS.length],
                         }}
                       />
                     </div>
@@ -397,9 +442,9 @@ export default function AnalyticsPage() {
               </div>
             )}
           </div>
-        </section>
+        </div>
 
-        <p className="mt-5 text-xs text-gray-500">
+        <p className={`mt-3 text-xs ${MUTED}`}>
           Transaction records are stored in your browser. Python analyzes
           the data through FastAPI; no database is used.
         </p>
@@ -408,14 +453,24 @@ export default function AnalyticsPage() {
   );
 }
 
-function SummaryCard({ title, amount, icon, color }) {
+function IconBubble({ children }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#121A20] p-5">
+    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/70 text-[#1E1B3A] shadow-sm dark:bg-white/10 dark:text-[#F1EFFB]">
+      {children}
+    </span>
+  );
+}
+
+function SummaryCard({ tone, title, amount, icon, color }) {
+  return (
+    <div className={`${TILE_BASE} ${TONES[tone]}`}>
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-400">{title}</p>
+        <p className={`text-sm font-medium ${MUTED}`}>{title}</p>
         <span className={color}>{icon}</span>
       </div>
-      <h2 className="mt-4 text-2xl font-semibold">{amount}</h2>
+      <h2 className={`mt-5 text-3xl font-extrabold tracking-tight ${color}`}>
+        {amount}
+      </h2>
     </div>
   );
 }
@@ -424,10 +479,10 @@ function Bar({ label, amount, max, color }) {
   return (
     <div>
       <div className="mb-2 flex justify-between text-sm">
-        <span className="text-gray-300">{label}</span>
-        <span>{money(amount)}</span>
+        <span>{label}</span>
+        <span className="font-semibold">{money(amount)}</span>
       </div>
-      <div className="h-3 overflow-hidden rounded-full bg-white/10">
+      <div className="h-3.5 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
           className={`h-full rounded-full ${color} transition-all`}
           style={{
@@ -441,12 +496,12 @@ function Bar({ label, amount, max, color }) {
 
 function EmptyState() {
   return (
-    <div className="rounded-xl border border-dashed border-white/10 py-12 text-center text-sm text-gray-400">
+    <div className={`rounded-2xl border border-dashed border-[#CFC9E6] py-12 text-center text-sm dark:border-[#34305A] ${MUTED}`}>
       No data yet. Add transactions first.
       <div className="mt-4">
         <Link
           href="/transactions"
-          className="text-[#83D9B0] hover:underline"
+          className="font-semibold text-[#E60023] hover:underline"
         >
           Go to Transactions
         </Link>

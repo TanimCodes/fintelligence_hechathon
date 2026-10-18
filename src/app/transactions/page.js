@@ -1,599 +1,3 @@
-
-// "use client";
-
-// import AppNavigation from "@/components/AppNavigation";
-// import { useEffect, useMemo, useState } from "react";
-// import Link from "next/link";
-// import {
-//   ArrowLeft,
-//   ArrowDownLeft,
-//   ArrowUpRight,
-//   Search,
-//   Plus,
-//   X,
-//   Trash2,
-//   Wallet,
-//   Download,
-// } from "lucide-react";
-
-// const STORAGE_KEY = "fintelligence-transactions-v1";
-
-// const categories = [
-//   "Food",
-//   "Transport",
-//   "Education",
-//   "Shopping",
-//   "Bills",
-//   "Entertainment",
-//   "Health",
-//   "Salary",
-//   "Freelance",
-//   "Other",
-// ];
-
-// function getToday() {
-//   const now = new Date();
-//   const year = now.getFullYear();
-//   const month = String(now.getMonth() + 1).padStart(2, "0");
-//   const day = String(now.getDate()).padStart(2, "0");
-
-//   return `${year}-${month}-${day}`;
-// }
-
-// const emptyForm = {
-//   title: "",
-//   amount: "",
-//   type: "expense",
-//   category: "Food",
-//   date: "",
-// };
-
-// export default function TransactionsPage() {
-//   const [transactions, setTransactions] = useState([]);
-//   const [loaded, setLoaded] = useState(false);
-//   const [search, setSearch] = useState("");
-//   const [filter, setFilter] = useState("All");
-//   const [showModal, setShowModal] = useState(false);
-//   const [editingId, setEditingId] = useState(null);
-//   const [form, setForm] = useState(emptyForm);
-
-//   // Load transactions from browser storage.
-//   useEffect(() => {
-//     try {
-//       const saved = localStorage.getItem(STORAGE_KEY);
-
-//       if (saved) {
-//         const parsed = JSON.parse(saved);
-
-//         if (Array.isArray(parsed)) {
-//           setTransactions(parsed);
-//         }
-//       }
-//     } catch (error) {
-//       console.error("Failed to load transactions:", error);
-//     } finally {
-//       setLoaded(true);
-//     }
-//   }, []);
-
-//   // Save transactions after loading is complete.
-//   useEffect(() => {
-//     if (!loaded) return;
-
-//     try {
-//       localStorage.setItem(
-//         STORAGE_KEY,
-//         JSON.stringify(transactions)
-//       );
-//     } catch (error) {
-//       console.error("Failed to save transactions:", error);
-//     }
-//   }, [transactions, loaded]);
-
-//   const filteredTransactions = useMemo(() => {
-//     return transactions.filter((transaction) => {
-//       const title = (transaction.title || "").toLowerCase();
-//       const category = (transaction.category || "").toLowerCase();
-//       const query = search.toLowerCase();
-
-//       const matchesSearch =
-//         title.includes(query) || category.includes(query);
-
-//       const matchesFilter =
-//         filter === "All" ||
-//         (filter === "Income" && transaction.type === "income") ||
-//         (filter === "Expenses" && transaction.type === "expense");
-
-//       return matchesSearch && matchesFilter;
-//     });
-//   }, [transactions, search, filter]);
-
-//   const income = transactions
-//     .filter((transaction) => transaction.type === "income")
-//     .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
-
-//   const expenses = transactions
-//     .filter((transaction) => transaction.type === "expense")
-//     .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
-
-//   function openAddModal() {
-//     setEditingId(null);
-//     setForm({
-//       ...emptyForm,
-//       date: getToday(),
-//     });
-//     setShowModal(true);
-//   }
-
-//   function openEditModal(transaction) {
-//     setEditingId(transaction.id);
-//     setForm({
-//       title: transaction.title || "",
-//       amount: String(transaction.amount ?? ""),
-//       type: transaction.type || "expense",
-//       category: transaction.category || "Other",
-//       date: transaction.date || getToday(),
-//     });
-//     setShowModal(true);
-//   }
-
-//   function handleSubmit(event) {
-//     event.preventDefault();
-
-//     const amount = Number(form.amount);
-
-//     if (!form.title.trim() || !Number.isFinite(amount) || amount <= 0) {
-//       alert("Enter a title and a valid amount.");
-//       return;
-//     }
-
-//     if (!form.date) {
-//       alert("Please select a transaction date.");
-//       return;
-//     }
-
-//     const transaction = {
-//       id: editingId ?? Date.now(),
-//       title: form.title.trim(),
-//       amount,
-//       type: form.type,
-//       category: form.category,
-//       date: form.date,
-//     };
-
-//     if (editingId !== null) {
-//       setTransactions((previous) =>
-//         previous.map((item) =>
-//           item.id === editingId ? transaction : item
-//         )
-//       );
-//     } else {
-//       setTransactions((previous) => [
-//         transaction,
-//         ...previous,
-//       ]);
-//     }
-
-//     setShowModal(false);
-//     setEditingId(null);
-//     setForm(emptyForm);
-//   }
-
-//   function deleteTransaction(id) {
-//     if (confirm("Delete this transaction?")) {
-//       setTransactions((previous) =>
-//         previous.filter((transaction) => transaction.id !== id)
-//       );
-//     }
-//   }
-
-//   function exportTransactions() {
-//     if (transactions.length === 0) {
-//       alert("No transactions to export!");
-//       return;
-//     }
-
-//     const headers = [
-//       "Title",
-//       "Amount",
-//       "Type",
-//       "Category",
-//       "Date",
-//     ];
-
-//     const rows = transactions.map((transaction) => [
-//       transaction.title,
-//       transaction.amount,
-//       transaction.type,
-//       transaction.category,
-//       transaction.date,
-//     ]);
-
-//     const csv = [headers, ...rows]
-//       .map((row) =>
-//         row
-//           .map(
-//             (value) =>
-//               `"${String(value ?? "").replace(/"/g, '""')}"`
-//           )
-//           .join(",")
-//       )
-//       .join("\r\n");
-
-//     const blob = new Blob(["\uFEFF" + csv], {
-//       type: "text/csv;charset=utf-8;",
-//     });
-
-//     const url = URL.createObjectURL(blob);
-//     const link = document.createElement("a");
-
-//     link.href = url;
-//     link.download = "fintelligence-transactions.csv";
-//     document.body.appendChild(link);
-//     link.click();
-//     link.remove();
-
-//     URL.revokeObjectURL(url);
-//   }
-
-//   function formatDate(date) {
-//     if (!date) return "—";
-
-//     const parsedDate = new Date(`${date}T00:00:00`);
-
-//     if (Number.isNaN(parsedDate.getTime())) return "—";
-
-//     return parsedDate.toLocaleDateString("en-US", {
-//       month: "short",
-//       day: "2-digit",
-//       year: "numeric",
-//     });
-//   }
-
-//   function formatMoney(amount) {
-//     return `৳${Number(amount || 0).toLocaleString("en-BD", {
-//       maximumFractionDigits: 2,
-//     })}`;
-//   }
-
-//   return (
-//     <main className="min-h-screen bg-[#0B1014] text-white">
-//       <div className="mx-auto max-w-7xl px-5 py-8 md:px-8">
-//         <AppNavigation />
-
-//         <header className="mb-9 flex flex-wrap items-center justify-between gap-4">
-//           <div className="flex items-center gap-3">
-//             <Link
-//               href="/"
-//               className="rounded-xl border border-white/10 p-2.5 text-gray-300 hover:bg-white/10"
-//               aria-label="Back to dashboard"
-//             >
-//               <ArrowLeft size={19} />
-//             </Link>
-
-//             <div>
-//               <p className="text-sm text-[#83D9B0]">FINTELLIGENCE</p>
-//               <h1 className="mt-1 text-2xl font-semibold md:text-3xl">
-//                 Transactions
-//               </h1>
-//               <p className="mt-1 text-sm text-gray-400">
-//                 Manage your income and expenses.
-//               </p>
-//             </div>
-//           </div>
-
-//           <div className="flex flex-wrap gap-3">
-//             <button
-//               onClick={exportTransactions}
-//               className="flex items-center gap-2 rounded-xl border border-[#83D9B0]/40 px-4 py-3 font-medium text-[#83D9B0] hover:bg-[#83D9B0]/10"
-//             >
-//               <Download size={18} />
-//               Export CSV
-//             </button>
-
-//             <button
-//               onClick={openAddModal}
-//               className="flex items-center gap-2 rounded-xl bg-[#83D9B0] px-4 py-3 font-semibold text-[#0B1014] hover:bg-[#9CE8C5]"
-//             >
-//               <Plus size={18} />
-//               Add Transaction
-//             </button>
-//           </div>
-//         </header>
-
-//         <section className="mb-7 grid gap-4 sm:grid-cols-2">
-//           <div className="rounded-2xl border border-white/10 bg-[#121A20] p-5">
-//             <div className="flex items-center justify-between">
-//               <p className="text-sm text-gray-400">Total Income</p>
-//               <ArrowDownLeft className="text-[#83D9B0]" />
-//             </div>
-//             <h2 className="mt-4 text-2xl font-semibold">
-//               {formatMoney(income)}
-//             </h2>
-//           </div>
-
-//           <div className="rounded-2xl border border-white/10 bg-[#121A20] p-5">
-//             <div className="flex items-center justify-between">
-//               <p className="text-sm text-gray-400">Total Expenses</p>
-//               <ArrowUpRight className="text-rose-400" />
-//             </div>
-//             <h2 className="mt-4 text-2xl font-semibold">
-//               {formatMoney(expenses)}
-//             </h2>
-//           </div>
-//         </section>
-
-//         <section className="rounded-2xl border border-white/10 bg-[#121A20] p-5 md:p-6">
-//           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-//             <h2 className="text-lg font-semibold">All Transactions</h2>
-
-//             <div className="flex flex-col gap-3 sm:flex-row">
-//               <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0B1014] px-3">
-//                 <Search size={17} className="text-gray-400" />
-//                 <input
-//                   value={search}
-//                   onChange={(event) => setSearch(event.target.value)}
-//                   placeholder="Search transactions..."
-//                   className="w-full bg-transparent py-3 text-sm outline-none sm:w-52"
-//                 />
-//               </div>
-
-//               <select
-//                 value={filter}
-//                 onChange={(event) => setFilter(event.target.value)}
-//                 className="rounded-xl border border-white/10 bg-[#0B1014] px-3 py-3 text-sm outline-none"
-//               >
-//                 <option>All</option>
-//                 <option>Income</option>
-//                 <option>Expenses</option>
-//               </select>
-//             </div>
-//           </div>
-
-//           {!loaded ? (
-//             <p className="py-12 text-center text-gray-400">
-//               Loading transactions...
-//             </p>
-//           ) : filteredTransactions.length === 0 ? (
-//             <div className="py-14 text-center">
-//               <Wallet
-//                 size={36}
-//                 className="mx-auto mb-3 text-gray-500"
-//               />
-//               <p className="font-medium">No transactions found</p>
-//               <p className="mt-2 text-sm text-gray-400">
-//                 Add a transaction to get started.
-//               </p>
-//               <button
-//                 onClick={openAddModal}
-//                 className="mt-5 rounded-xl bg-[#83D9B0] px-4 py-2.5 font-semibold text-[#0B1014]"
-//               >
-//                 <Plus size={16} className="mr-1 inline" />
-//                 Add Transaction
-//               </button>
-//             </div>
-//           ) : (
-//             <div className="overflow-x-auto">
-//               <table className="w-full min-w-[650px] text-left text-sm">
-//                 <thead>
-//                   <tr className="border-b border-white/10 text-gray-400">
-//                     <th className="pb-4 font-medium">Transaction</th>
-//                     <th className="pb-4 font-medium">Category</th>
-//                     <th className="pb-4 font-medium">Date</th>
-//                     <th className="pb-4 text-right font-medium">Amount</th>
-//                     <th className="pb-4 text-right font-medium">Actions</th>
-//                   </tr>
-//                 </thead>
-
-//                 <tbody>
-//                   {filteredTransactions.map((transaction) => (
-//                     <tr
-//                       key={transaction.id}
-//                       className="border-b border-white/5 last:border-0"
-//                     >
-//                       <td className="py-5 pr-4">
-//                         <div className="flex items-center gap-3">
-//                           <span
-//                             className={`rounded-xl p-2 ${
-//                               transaction.type === "income"
-//                                 ? "bg-[#83D9B0]/10 text-[#83D9B0]"
-//                                 : "bg-rose-400/10 text-rose-400"
-//                             }`}
-//                           >
-//                             {transaction.type === "income" ? (
-//                               <ArrowDownLeft size={18} />
-//                             ) : (
-//                               <ArrowUpRight size={18} />
-//                             )}
-//                           </span>
-//                           <span className="font-medium">
-//                             {transaction.title}
-//                           </span>
-//                         </div>
-//                       </td>
-
-//                       <td className="py-5 pr-4 text-gray-300">
-//                         {transaction.category}
-//                       </td>
-
-//                       <td className="py-5 pr-4 text-gray-400">
-//                         {formatDate(transaction.date)}
-//                       </td>
-
-//                       <td
-//                         className={`py-5 text-right font-semibold ${
-//                           transaction.type === "income"
-//                             ? "text-[#83D9B0]"
-//                             : "text-rose-400"
-//                         }`}
-//                       >
-//                         {transaction.type === "income" ? "+" : "-"}
-//                         {formatMoney(transaction.amount)}
-//                       </td>
-
-//                       <td className="py-5 text-right">
-//                         <div className="flex justify-end gap-2">
-//                           <button
-//                             onClick={() => openEditModal(transaction)}
-//                             className="rounded-lg border border-white/10 px-3 py-2 text-xs text-gray-300 hover:bg-white/10"
-//                           >
-//                             Edit
-//                           </button>
-//                           <button
-//                             onClick={() => deleteTransaction(transaction.id)}
-//                             className="rounded-lg border border-white/10 p-2 text-rose-400 hover:bg-rose-400/10"
-//                             aria-label={`Delete ${transaction.title}`}
-//                           >
-//                             <Trash2 size={15} />
-//                           </button>
-//                         </div>
-//                       </td>
-//                     </tr>
-//                   ))}
-//                 </tbody>
-//               </table>
-//             </div>
-//           )}
-//         </section>
-
-//         <p className="mt-5 text-xs text-gray-500">
-//           Data is saved locally in this browser. It is not synced across devices.
-//         </p>
-//       </div>
-
-//       {showModal && (
-//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-//           <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#121A20] p-6 shadow-2xl">
-//             <div className="mb-6 flex items-center justify-between">
-//               <h2 className="text-xl font-semibold">
-//                 {editingId !== null ? "Edit Transaction" : "Add Transaction"}
-//               </h2>
-//               <button
-//                 onClick={() => setShowModal(false)}
-//                 className="rounded-lg p-2 text-gray-400 hover:bg-white/10 hover:text-white"
-//                 aria-label="Close"
-//               >
-//                 <X size={20} />
-//               </button>
-//             </div>
-
-//             <form onSubmit={handleSubmit} className="space-y-4">
-//               <div>
-//                 <label className="mb-2 block text-sm text-gray-300">
-//                   Transaction title
-//                 </label>
-//                 <input
-//                   required
-//                   value={form.title}
-//                   onChange={(event) =>
-//                     setForm({ ...form, title: event.target.value })
-//                   }
-//                   placeholder="e.g. Grocery shopping"
-//                   className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
-//                 />
-//               </div>
-
-//               <div>
-//                 <label className="mb-2 block text-sm text-gray-300">
-//                   Amount (৳)
-//                 </label>
-//                 <input
-//                   required
-//                   type="number"
-//                   min="0.01"
-//                   step="0.01"
-//                   value={form.amount}
-//                   onChange={(event) =>
-//                     setForm({ ...form, amount: event.target.value })
-//                   }
-//                   placeholder="0.00"
-//                   className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
-//                 />
-//               </div>
-
-//               <div>
-//                 <label className="mb-2 block text-sm text-gray-300">
-//                   Type
-//                 </label>
-//                 <div className="grid grid-cols-2 gap-3">
-//                   {["expense", "income"].map((type) => (
-//                     <button
-//                       key={type}
-//                       type="button"
-//                       onClick={() =>
-//                         setForm({
-//                           ...form,
-//                           type,
-//                           category:
-//                             type === "income" ? "Salary" : "Food",
-//                         })
-//                       }
-//                       className={`rounded-xl border px-4 py-3 capitalize ${
-//                         form.type === type
-//                           ? "border-[#83D9B0] bg-[#83D9B0]/10 text-[#83D9B0]"
-//                           : "border-white/10 text-gray-300"
-//                       }`}
-//                     >
-//                       {type}
-//                     </button>
-//                   ))}
-//                 </div>
-//               </div>
-
-//               <div>
-//                 <label className="mb-2 block text-sm text-gray-300">
-//                   Category
-//                 </label>
-//                 <select
-//                   value={form.category}
-//                   onChange={(event) =>
-//                     setForm({ ...form, category: event.target.value })
-//                   }
-//                   className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
-//                 >
-//                   {categories
-//                     .filter((category) =>
-//                       form.type === "income"
-//                         ? ["Salary", "Freelance", "Other"].includes(category)
-//                         : !["Salary", "Freelance"].includes(category)
-//                     )
-//                     .map((category) => (
-//                       <option key={category} value={category}>
-//                         {category}
-//                       </option>
-//                     ))}
-//                 </select>
-//               </div>
-
-//               <div>
-//                 <label className="mb-2 block text-sm text-gray-300">
-//                   Date
-//                 </label>
-//                 <input
-//                   required
-//                   type="date"
-//                   value={form.date}
-//                   onChange={(event) =>
-//                     setForm({ ...form, date: event.target.value })
-//                   }
-//                   className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
-//                 />
-//               </div>
-
-//               <button
-//                 type="submit"
-//                 className="w-full rounded-xl bg-[#83D9B0] py-3 font-semibold text-[#0B1014] hover:bg-[#9CE8C5]"
-//               >
-//                 {editingId !== null ? "Save Changes" : "Add Transaction"}
-//               </button>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-//     </main>
-//   );
-// }
-
 "use client";
 
 import AppNavigation from "@/components/AppNavigation";
@@ -633,6 +37,33 @@ const categories = [
   "Freelance",
   "Other",
 ];
+
+// Design tokens (Pinterest-style pastel boards, light + dark)
+const TILE_BASE =
+  "rounded-[28px] p-5 transition duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#1E1B3A]/10";
+
+const TONES = {
+  surface:
+    "bg-white ring-1 ring-[#E4E0F0] dark:bg-[#201D3D] dark:ring-[#34305A]",
+  peach: "bg-[#FFE3D6] dark:bg-[#4A2E33]",
+  mint: "bg-[#D5F3E6] dark:bg-[#1F4437]",
+  sky: "bg-[#D8EAFE] dark:bg-[#1F3555]",
+  lilac: "bg-[#E6DDFB] dark:bg-[#3A2F66]",
+  butter: "bg-[#FFF1C2] dark:bg-[#4A4122]",
+};
+
+const MUTED = "text-[#6B6885] dark:text-[#A9A5C7]";
+const GOOD = "text-[#0F7A5F] dark:text-[#6FE3C0]";
+const BAD = "text-[#C2263A] dark:text-[#FF8A93]";
+const LINE = "border-[#EEEAF7] dark:border-[#2A2650]";
+
+const FIELD =
+  "w-full rounded-2xl border border-[#E4E0F0] bg-white px-4 py-3.5 text-sm outline-none transition placeholder:text-[#9C98B5] focus:border-[#E60023] dark:border-[#34305A] dark:bg-[#15132A]";
+
+const OPTION = "bg-white text-[#1E1B3A] dark:bg-[#201D3D] dark:text-[#F1EFFB]";
+
+const ICON_BTN =
+  "rounded-full bg-[#F5F3FA] p-2 transition hover:scale-105 dark:bg-white/10";
 
 function getToday() {
   const now = new Date();
@@ -852,18 +283,15 @@ export default function TransactionsPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#080D18] text-white">
-      <div className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-emerald-400/[0.06] blur-[120px]" />
-      <div className="pointer-events-none absolute -right-40 top-96 h-96 w-96 rounded-full bg-cyan-400/[0.04] blur-[120px]" />
-
+    <main className="relative min-h-screen overflow-hidden bg-[#F5F3FA] text-[#1E1B3A] dark:bg-[#15132A] dark:text-[#F1EFFB]">
       <div className="relative mx-auto max-w-[1440px] px-4 py-5 sm:px-6 md:px-8 md:py-8">
         <AppNavigation />
 
         <header className="mb-8 mt-7 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-4">
             <Link
               href="/"
-              className="mt-1 rounded-xl border border-white/10 bg-white/[0.03] p-2.5 text-slate-300 transition hover:border-emerald-300/30 hover:bg-emerald-300/10 hover:text-emerald-300"
+              className="mt-1 rounded-full bg-white p-3 text-[#1E1B3A] shadow-sm ring-1 ring-[#E4E0F0] transition hover:scale-105 hover:shadow-md dark:bg-[#201D3D] dark:text-[#F1EFFB] dark:ring-[#34305A]"
               aria-label="Back to dashboard"
             >
               <ArrowLeft size={19} />
@@ -871,17 +299,17 @@ export default function TransactionsPage() {
 
             <div>
               <div className="mb-2 flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(110,231,183,0.6)]" />
-                <p className="text-xs font-semibold tracking-[0.22em] text-emerald-300">
+                <span className="h-2 w-2 rounded-full bg-[#E60023]" />
+                <p className="text-xs font-bold tracking-[0.22em] text-[#E60023]">
                   FINANCIAL MANAGEMENT
                 </p>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Transactions<span className="text-emerald-300">.</span>
+              <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Transactions<span className="text-[#E60023]">.</span>
               </h1>
 
-              <p className="mt-2 text-sm text-slate-400">
+              <p className={`mt-2 text-sm ${MUTED}`}>
                 Track every taka. Understand every decision.
               </p>
             </div>
@@ -890,7 +318,7 @@ export default function TransactionsPage() {
           <div className="flex flex-wrap gap-3 sm:justify-end">
             <button
               onClick={exportTransactions}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-emerald-300/30 hover:bg-emerald-300/[0.06] hover:text-emerald-300"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-[#1E1B3A] shadow-sm ring-1 ring-[#E4E0F0] transition hover:scale-[1.02] hover:shadow-md dark:bg-[#201D3D] dark:text-[#F1EFFB] dark:ring-[#34305A]"
             >
               <Download size={17} />
               Export CSV
@@ -898,7 +326,7 @@ export default function TransactionsPage() {
 
             <button
               onClick={openAddModal}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 py-3 text-sm font-bold text-[#07111b] shadow-[0_5px_25px_rgba(110,231,183,0.12)] transition hover:bg-emerald-200 hover:shadow-[0_5px_30px_rgba(110,231,183,0.22)]"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#E60023] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:brightness-110"
             >
               <Plus size={18} />
               Add Transaction
@@ -906,7 +334,7 @@ export default function TransactionsPage() {
           </div>
         </header>
 
-        <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           <StatCard
             title="Total Income"
             amount={formatMoney(income)}
@@ -932,16 +360,20 @@ export default function TransactionsPage() {
           />
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-white/[0.09] bg-[#0D1522]/90 shadow-2xl shadow-black/10">
-          <div className="flex flex-col gap-4 border-b border-white/[0.07] p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+        <section
+          className={`overflow-hidden rounded-[28px] shadow-sm ${TONES.surface}`}
+        >
+          <div className={`flex flex-col gap-4 border-b p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between ${LINE}`}>
             <div>
               <div className="flex items-center gap-3">
-                <div className="rounded-xl border border-emerald-300/15 bg-emerald-300/[0.08] p-2.5 text-emerald-300">
+                <IconBubble tone="lilac">
                   <ReceiptText size={20} />
-                </div>
+                </IconBubble>
                 <div>
-                  <h2 className="text-lg font-bold">All Transactions</h2>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <h2 className="text-lg font-extrabold tracking-tight">
+                    All Transactions
+                  </h2>
+                  <p className={`mt-1 text-xs ${MUTED}`}>
                     {filteredTransactions.length}{" "}
                     {filteredTransactions.length === 1
                       ? "record"
@@ -953,18 +385,18 @@ export default function TransactionsPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="flex min-w-0 items-center gap-2 rounded-xl border border-white/[0.09] bg-[#080D18] px-3 transition focus-within:border-emerald-300/40 sm:w-64">
-                <Search size={17} className="shrink-0 text-slate-500" />
+              <div className="flex min-w-0 items-center gap-2 rounded-full border border-[#E4E0F0] bg-[#F5F3FA] px-4 transition focus-within:border-[#E60023] dark:border-[#34305A] dark:bg-[#15132A] sm:w-64">
+                <Search size={17} className={`shrink-0 ${MUTED}`} />
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search transactions..."
-                  className="min-w-0 flex-1 bg-transparent py-3 text-sm text-white outline-none placeholder:text-slate-600"
+                  className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-[#9C98B5]"
                 />
                 {search && (
                   <button
                     onClick={() => setSearch("")}
-                    className="text-slate-500 hover:text-white"
+                    className={`${MUTED} hover:text-[#E60023]`}
                     aria-label="Clear search"
                   >
                     <X size={15} />
@@ -972,16 +404,16 @@ export default function TransactionsPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 rounded-xl border border-white/[0.09] bg-[#080D18] px-3">
-                <SlidersHorizontal size={16} className="text-slate-500" />
+              <div className="flex items-center gap-2 rounded-full border border-[#E4E0F0] bg-[#F5F3FA] px-4 dark:border-[#34305A] dark:bg-[#15132A]">
+                <SlidersHorizontal size={16} className={MUTED} />
                 <select
                   value={filter}
                   onChange={(event) => setFilter(event.target.value)}
-                  className="w-full bg-transparent py-3 text-sm text-slate-300 outline-none sm:w-auto"
+                  className="w-full bg-transparent py-3 text-sm font-medium outline-none sm:w-auto"
                 >
-                  <option className="bg-[#0D1522]">All</option>
-                  <option className="bg-[#0D1522]">Income</option>
-                  <option className="bg-[#0D1522]">Expenses</option>
+                  <option className={OPTION}>All</option>
+                  <option className={OPTION}>Income</option>
+                  <option className={OPTION}>Expenses</option>
                 </select>
               </div>
             </div>
@@ -989,24 +421,24 @@ export default function TransactionsPage() {
 
           {!loaded ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-emerald-300/20 border-t-emerald-300" />
-              <p className="text-sm text-slate-400">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#E60023]/20 border-t-[#E60023]" />
+              <p className={`text-sm ${MUTED}`}>
                 Loading your transactions...
               </p>
             </div>
           ) : filteredTransactions.length === 0 ? (
             <div className="px-5 py-16 text-center sm:py-20">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.06] text-emerald-300">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#E6DDFB] text-[#1E1B3A] dark:bg-[#3A2F66] dark:text-[#F1EFFB]">
                 <Wallet size={30} />
               </div>
 
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-extrabold tracking-tight">
                 {search || filter !== "All"
                   ? "No matching transactions"
                   : "Your financial journey starts here"}
               </h3>
 
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-400">
+              <p className={`mx-auto mt-2 max-w-sm text-sm leading-6 ${MUTED}`}>
                 {search || filter !== "All"
                   ? "Try a different search term or change your filter."
                   : "Add your first transaction to start tracking income and expenses."}
@@ -1018,14 +450,14 @@ export default function TransactionsPage() {
                     setSearch("");
                     setFilter("All");
                   }}
-                  className="mt-5 rounded-xl border border-white/10 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5"
+                  className="mt-5 rounded-full bg-[#F5F3FA] px-5 py-2.5 text-sm font-bold ring-1 ring-[#E4E0F0] transition hover:scale-[1.02] dark:bg-white/10 dark:ring-[#34305A]"
                 >
                   Clear filters
                 </button>
               ) : (
                 <button
                   onClick={openAddModal}
-                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-300 px-4 py-3 text-sm font-bold text-[#07111b] hover:bg-emerald-200"
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#E60023] px-5 py-3 text-sm font-bold text-white transition hover:brightness-110"
                 >
                   <Plus size={17} />
                   Add your first transaction
@@ -1036,24 +468,24 @@ export default function TransactionsPage() {
             <>
               <div className="hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[760px] text-left text-sm">
-                  <thead className="bg-white/[0.015]">
-                    <tr className="border-b border-white/[0.07] text-xs uppercase tracking-wider text-slate-500">
-                      <th className="px-6 py-4 font-semibold">
+                  <thead className="bg-[#F5F3FA]/70 dark:bg-white/5">
+                    <tr className={`border-b text-xs uppercase tracking-wider ${LINE} ${MUTED}`}>
+                      <th className="px-6 py-4 font-bold">
                         Transaction
                       </th>
-                      <th className="px-4 py-4 font-semibold">Category</th>
-                      <th className="px-4 py-4 font-semibold">
+                      <th className="px-4 py-4 font-bold">Category</th>
+                      <th className="px-4 py-4 font-bold">
                         <button
                           onClick={() => setSortNewest((value) => !value)}
-                          className="inline-flex items-center gap-2 transition hover:text-emerald-300"
+                          className="inline-flex items-center gap-2 transition hover:text-[#E60023]"
                         >
                           Date <ArrowUpDown size={13} />
                         </button>
                       </th>
-                      <th className="px-4 py-4 text-right font-semibold">
+                      <th className="px-4 py-4 text-right font-bold">
                         Amount
                       </th>
-                      <th className="px-6 py-4 text-right font-semibold">
+                      <th className="px-6 py-4 text-right font-bold">
                         Actions
                       </th>
                     </tr>
@@ -1066,15 +498,15 @@ export default function TransactionsPage() {
                       return (
                         <tr
                           key={transaction.id}
-                          className="group border-b border-white/[0.045] transition hover:bg-white/[0.025] last:border-0"
+                          className={`group border-b transition hover:bg-[#F5F3FA]/70 last:border-0 dark:hover:bg-white/5 ${LINE}`}
                         >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div
-                                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${
+                                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
                                   isIncome
-                                    ? "border-emerald-300/10 bg-emerald-300/[0.08] text-emerald-300"
-                                    : "border-rose-300/10 bg-rose-300/[0.07] text-rose-300"
+                                    ? `bg-[#D5F3E6] dark:bg-[#1F4437] ${GOOD}`
+                                    : `bg-[#FFE3D6] dark:bg-[#4A2E33] ${BAD}`
                                 }`}
                               >
                                 {isIncome ? (
@@ -1085,10 +517,10 @@ export default function TransactionsPage() {
                               </div>
 
                               <div className="min-w-0">
-                                <p className="max-w-[240px] truncate font-semibold text-slate-100">
+                                <p className="max-w-[240px] truncate font-bold">
                                   {transaction.title || "Untitled"}
                                 </p>
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className={`mt-1 text-xs ${MUTED}`}>
                                   {isIncome ? "Income" : "Expense"}
                                 </p>
                               </div>
@@ -1096,26 +528,21 @@ export default function TransactionsPage() {
                           </td>
 
                           <td className="px-4 py-4">
-                            <span className="inline-flex items-center rounded-lg border border-white/[0.07] bg-white/[0.025] px-2.5 py-1.5 text-xs text-slate-300">
+                            <span className="inline-flex items-center rounded-full bg-[#E6DDFB] px-3 py-1.5 text-xs font-semibold dark:bg-[#3A2F66]">
                               {transaction.category || "Other"}
                             </span>
                           </td>
 
                           <td className="px-4 py-4">
-                            <div className="flex items-center gap-2 text-slate-400">
-                              <CalendarDays
-                                size={15}
-                                className="text-slate-600"
-                              />
+                            <div className={`flex items-center gap-2 ${MUTED}`}>
+                              <CalendarDays size={15} />
                               {formatDate(transaction.date)}
                             </div>
                           </td>
 
                           <td
-                            className={`px-4 py-4 text-right font-bold ${
-                              isIncome
-                                ? "text-emerald-300"
-                                : "text-rose-300"
+                            className={`px-4 py-4 text-right font-extrabold ${
+                              isIncome ? GOOD : BAD
                             }`}
                           >
                             {isIncome ? "+" : "−"}
@@ -1126,7 +553,7 @@ export default function TransactionsPage() {
                             <div className="flex justify-end gap-2 opacity-70 transition group-hover:opacity-100">
                               <button
                                 onClick={() => openEditModal(transaction)}
-                                className="rounded-lg border border-white/[0.08] p-2 text-slate-400 transition hover:border-emerald-300/20 hover:bg-emerald-300/[0.07] hover:text-emerald-300"
+                                className={`${ICON_BTN} hover:text-[#E60023]`}
                                 aria-label={`Edit ${transaction.title}`}
                               >
                                 <Pencil size={15} />
@@ -1135,7 +562,7 @@ export default function TransactionsPage() {
                                 onClick={() =>
                                   deleteTransaction(transaction.id)
                                 }
-                                className="rounded-lg border border-white/[0.08] p-2 text-slate-500 transition hover:border-rose-300/20 hover:bg-rose-300/[0.07] hover:text-rose-300"
+                                className={`${ICON_BTN} ${BAD}`}
                                 aria-label={`Delete ${transaction.title}`}
                               >
                                 <Trash2 size={15} />
@@ -1149,22 +576,22 @@ export default function TransactionsPage() {
                 </table>
               </div>
 
-              <div className="divide-y divide-white/[0.06] md:hidden">
+              <div className="columns-1 gap-4 p-4 sm:columns-2 md:hidden [&>*]:mb-4 [&>*]:break-inside-avoid">
                 {filteredTransactions.map((transaction) => {
                   const isIncome = transaction.type === "income";
 
                   return (
                     <div
                       key={transaction.id}
-                      className="p-4 transition hover:bg-white/[0.02] sm:p-5"
+                      className={`rounded-3xl p-4 sm:p-5 ${
+                        isIncome ? TONES.mint : TONES.peach
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-3">
                           <div
-                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
-                              isIncome
-                                ? "bg-emerald-300/[0.09] text-emerald-300"
-                                : "bg-rose-300/[0.08] text-rose-300"
+                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/70 dark:bg-white/10 ${
+                              isIncome ? GOOD : BAD
                             }`}
                           >
                             {isIncome ? (
@@ -1175,20 +602,18 @@ export default function TransactionsPage() {
                           </div>
 
                           <div className="min-w-0">
-                            <p className="truncate font-semibold">
+                            <p className="truncate font-bold">
                               {transaction.title || "Untitled"}
                             </p>
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className={`mt-1 text-xs ${MUTED}`}>
                               {transaction.category || "Other"}
                             </p>
                           </div>
                         </div>
 
                         <p
-                          className={`shrink-0 text-sm font-bold ${
-                            isIncome
-                              ? "text-emerald-300"
-                              : "text-rose-300"
+                          className={`shrink-0 text-sm font-extrabold ${
+                            isIncome ? GOOD : BAD
                           }`}
                         >
                           {isIncome ? "+" : "−"}
@@ -1197,7 +622,7 @@ export default function TransactionsPage() {
                       </div>
 
                       <div className="mt-4 flex items-center justify-between gap-3">
-                        <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <span className={`flex items-center gap-1.5 text-xs ${MUTED}`}>
                           <CalendarDays size={14} />
                           {formatDate(transaction.date)}
                         </span>
@@ -1205,7 +630,7 @@ export default function TransactionsPage() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => openEditModal(transaction)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-300"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-2 text-xs font-bold dark:bg-white/10"
                           >
                             <Pencil size={13} />
                             Edit
@@ -1214,7 +639,7 @@ export default function TransactionsPage() {
                             onClick={() =>
                               deleteTransaction(transaction.id)
                             }
-                            className="rounded-lg border border-white/10 p-2 text-rose-300"
+                            className={`rounded-full bg-white/70 p-2 dark:bg-white/10 ${BAD}`}
                             aria-label={`Delete ${transaction.title}`}
                           >
                             <Trash2 size={14} />
@@ -1228,19 +653,19 @@ export default function TransactionsPage() {
             </>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] bg-white/[0.015] px-5 py-4 text-xs text-slate-500 sm:px-6">
+          <div className={`flex flex-wrap items-center justify-between gap-3 border-t bg-[#F5F3FA]/70 px-5 py-4 text-xs dark:bg-white/5 sm:px-6 ${LINE} ${MUTED}`}>
             <span>
               Showing {filteredTransactions.length} of {transactions.length}{" "}
               transactions
             </span>
             <span className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#2FBF9B]" />
               Data saved in this browser
             </span>
           </div>
         </section>
 
-        <footer className="mt-7 flex flex-col items-center justify-between gap-3 pb-3 text-xs text-slate-600 sm:flex-row">
+        <footer className={`mt-7 flex flex-col items-center justify-between gap-3 pb-3 text-xs sm:flex-row ${MUTED}`}>
           <p>© Fintelligence · Personal Finance Management</p>
           <p className="flex items-center gap-1.5">
             <CircleDollarSign size={14} />
@@ -1251,30 +676,30 @@ export default function TransactionsPage() {
 
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#1E1B3A]/60 p-4 backdrop-blur-sm"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               setShowModal(false);
             }
           }}
         >
-          <div className="my-auto w-full max-w-lg overflow-hidden rounded-2xl border border-white/[0.1] bg-[#0D1522] shadow-[0_25px_100px_rgba(0,0,0,0.5)]">
-            <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-5 sm:px-6">
+          <div className="my-auto w-full max-w-lg overflow-hidden rounded-[28px] bg-white shadow-2xl dark:bg-[#201D3D]">
+            <div className={`flex items-center justify-between border-b px-5 py-5 sm:px-6 ${LINE}`}>
               <div className="flex items-center gap-3">
-                <div className="rounded-xl border border-emerald-300/15 bg-emerald-300/[0.08] p-2.5 text-emerald-300">
+                <IconBubble tone="lilac">
                   {editingId !== null ? (
                     <Pencil size={19} />
                   ) : (
                     <Plus size={20} />
                   )}
-                </div>
+                </IconBubble>
                 <div>
-                  <h2 className="text-lg font-bold">
+                  <h2 className="text-lg font-extrabold tracking-tight">
                     {editingId !== null
                       ? "Edit Transaction"
                       : "New Transaction"}
                   </h2>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className={`mt-1 text-xs ${MUTED}`}>
                     Enter the details below
                   </p>
                 </div>
@@ -1282,7 +707,7 @@ export default function TransactionsPage() {
 
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-xl border border-white/[0.08] p-2 text-slate-400 transition hover:bg-white/[0.06] hover:text-white"
+                className={ICON_BTN}
                 aria-label="Close modal"
               >
                 <X size={19} />
@@ -1291,7 +716,7 @@ export default function TransactionsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-6">
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-semibold">
                   Transaction title
                 </label>
                 <input
@@ -1301,16 +726,16 @@ export default function TransactionsPage() {
                     setForm({ ...form, title: event.target.value })
                   }
                   placeholder="e.g. Grocery shopping"
-                  className="w-full rounded-xl border border-white/[0.09] bg-[#080D18] px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-600 focus:border-emerald-300/50 focus:ring-2 focus:ring-emerald-300/[0.06]"
+                  className={FIELD}
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-semibold">
                   Amount
                 </label>
-                <div className="flex items-center rounded-xl border border-white/[0.09] bg-[#080D18] transition focus-within:border-emerald-300/50">
-                  <span className="border-r border-white/[0.07] px-4 py-3.5 text-sm font-semibold text-emerald-300">
+                <div className="flex items-center rounded-2xl border border-[#E4E0F0] bg-white transition focus-within:border-[#E60023] dark:border-[#34305A] dark:bg-[#15132A]">
+                  <span className="border-r border-[#E4E0F0] px-4 py-3.5 text-sm font-bold text-[#E60023] dark:border-[#34305A]">
                     ৳
                   </span>
                   <input
@@ -1323,13 +748,13 @@ export default function TransactionsPage() {
                       setForm({ ...form, amount: event.target.value })
                     }
                     placeholder="0.00"
-                    className="w-full bg-transparent px-4 py-3.5 text-sm outline-none placeholder:text-slate-600"
+                    className="w-full bg-transparent px-4 py-3.5 text-sm outline-none placeholder:text-[#9C98B5]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-semibold">
                   Transaction type
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -1348,12 +773,12 @@ export default function TransactionsPage() {
                             category: isIncome ? "Salary" : "Food",
                           })
                         }
-                        className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3.5 text-sm font-semibold capitalize transition ${
+                        className={`flex items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-bold capitalize transition ${
                           selected
                             ? isIncome
-                              ? "border-emerald-300/40 bg-emerald-300/[0.08] text-emerald-300"
-                              : "border-rose-300/40 bg-rose-300/[0.07] text-rose-300"
-                            : "border-white/[0.08] bg-white/[0.015] text-slate-400 hover:bg-white/[0.04]"
+                              ? `bg-[#D5F3E6] ring-2 ring-[#2FBF9B] dark:bg-[#1F4437] ${GOOD}`
+                              : `bg-[#FFE3D6] ring-2 ring-[#E8505B] dark:bg-[#4A2E33] ${BAD}`
+                            : `bg-[#F5F3FA] ring-1 ring-[#E4E0F0] hover:scale-[1.02] dark:bg-white/5 dark:ring-[#34305A] ${MUTED}`
                         }`}
                       >
                         {isIncome ? (
@@ -1370,7 +795,7 @@ export default function TransactionsPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-semibold">
                     Category
                   </label>
                   <select
@@ -1378,7 +803,7 @@ export default function TransactionsPage() {
                     onChange={(event) =>
                       setForm({ ...form, category: event.target.value })
                     }
-                    className="w-full rounded-xl border border-white/[0.09] bg-[#080D18] px-3 py-3.5 text-sm text-slate-200 outline-none focus:border-emerald-300/50"
+                    className={FIELD}
                   >
                     {categories
                       .filter((category) =>
@@ -1390,7 +815,7 @@ export default function TransactionsPage() {
                         <option
                           key={category}
                           value={category}
-                          className="bg-[#0D1522]"
+                          className={OPTION}
                         >
                           {category}
                         </option>
@@ -1399,7 +824,7 @@ export default function TransactionsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-semibold">
                     Date
                   </label>
                   <input
@@ -1409,22 +834,22 @@ export default function TransactionsPage() {
                     onChange={(event) =>
                       setForm({ ...form, date: event.target.value })
                     }
-                    className="w-full rounded-xl border border-white/[0.09] bg-[#080D18] px-3 py-3.5 text-sm text-slate-200 outline-none focus:border-emerald-300/50"
+                    className={FIELD}
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 border-t border-white/[0.07] pt-5">
+              <div className={`flex gap-3 border-t pt-5 ${LINE}`}>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 rounded-xl border border-white/[0.09] px-4 py-3.5 text-sm font-semibold text-slate-300 transition hover:bg-white/[0.04]"
+                  className="flex-1 rounded-full bg-[#F5F3FA] px-4 py-3.5 text-sm font-bold ring-1 ring-[#E4E0F0] transition hover:scale-[1.02] dark:bg-white/10 dark:ring-[#34305A]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 py-3.5 text-sm font-bold text-[#07111b] transition hover:bg-emerald-200"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#E60023] px-4 py-3.5 text-sm font-bold text-white transition hover:brightness-110"
                 >
                   {editingId !== null ? (
                     <Pencil size={16} />
@@ -1442,52 +867,51 @@ export default function TransactionsPage() {
   );
 }
 
+function IconBubble({ children, tone = "surface" }) {
+  const bg = {
+    surface: "bg-[#F5F3FA] dark:bg-white/10",
+    lilac: "bg-[#E6DDFB] dark:bg-[#3A2F66]",
+  };
+
+  return (
+    <span
+      className={`grid h-11 w-11 shrink-0 place-items-center rounded-full text-[#1E1B3A] dark:text-[#F1EFFB] ${bg[tone]}`}
+    >
+      {children}
+    </span>
+  );
+}
+
 function StatCard({ title, amount, note, icon: Icon, color }) {
   const styles = {
-    emerald: {
-      icon: "border-emerald-300/10 bg-emerald-300/[0.08] text-emerald-300",
-      glow: "group-hover:border-emerald-300/20",
-      accent: "bg-emerald-300",
-    },
-    rose: {
-      icon: "border-rose-300/10 bg-rose-300/[0.07] text-rose-300",
-      glow: "group-hover:border-rose-300/20",
-      accent: "bg-rose-300",
-    },
-    blue: {
-      icon: "border-sky-300/10 bg-sky-300/[0.07] text-sky-300",
-      glow: "group-hover:border-sky-300/20",
-      accent: "bg-sky-300",
-    },
+    emerald: { tone: TONES.mint, text: GOOD, dot: "bg-[#2FBF9B]" },
+    rose: { tone: TONES.peach, text: BAD, dot: "bg-[#E8505B]" },
+    blue: { tone: TONES.sky, text: "text-[#1F5FA8] dark:text-[#8EC1FF]", dot: "bg-[#4A90E2]" },
   };
 
   const style = styles[color];
 
   return (
-    <div
-      className={`group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1522] p-5 transition duration-300 hover:-translate-y-0.5 hover:bg-[#101a29] ${style.glow}`}
-    >
-      <div
-        className={`absolute right-0 top-0 h-28 w-28 translate-x-8 -translate-y-8 rounded-full opacity-[0.06] blur-2xl ${style.accent}`}
-      />
-
-      <div className="relative flex items-start justify-between gap-3">
+    <div className={`${TILE_BASE} ${style.tone}`}>
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-400">{title}</p>
-          <p className="mt-4 break-words text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          <p className={`text-sm font-medium ${MUTED}`}>{title}</p>
+          <p className="mt-4 break-words text-3xl font-extrabold tracking-tight sm:text-4xl">
             {amount}
           </p>
-          <p className="mt-2 text-xs text-slate-500">{note}</p>
+          <p className={`mt-2 text-xs ${MUTED}`}>{note}</p>
         </div>
 
-        <div className={`rounded-xl border p-3 ${style.icon}`}>
+        <div
+          className={`grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white/70 dark:bg-white/10 ${style.text}`}
+        >
           <Icon size={22} />
         </div>
       </div>
 
-      <div className="mt-5 h-px w-full bg-white/[0.05]" />
-      <p className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-        <span className={`h-1.5 w-1.5 rounded-full ${style.accent}`} />
+      <div className="mt-5 h-px w-full bg-black/10 dark:bg-white/10" />
+      <p className={`mt-3 flex items-center gap-2 text-xs ${MUTED}`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
         All recorded transactions
       </p>
     </div>

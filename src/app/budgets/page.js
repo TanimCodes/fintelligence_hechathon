@@ -1,4 +1,3 @@
-
 "use client";
 
 import AppNavigation from "@/components/AppNavigation";
@@ -35,6 +34,30 @@ const currencySymbols = {
   EUR: "€",
   GBP: "£",
 };
+
+// Design tokens (Pinterest-style pastel boards, light + dark)
+const TILE_BASE =
+  "rounded-[28px] p-6 transition duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#1E1B3A]/10";
+
+const TONES = {
+  surface:
+    "bg-white ring-1 ring-[#E4E0F0] dark:bg-[#201D3D] dark:ring-[#34305A]",
+  peach: "bg-[#FFE3D6] dark:bg-[#4A2E33]",
+  mint: "bg-[#D5F3E6] dark:bg-[#1F4437]",
+  sky: "bg-[#D8EAFE] dark:bg-[#1F3555]",
+  lilac: "bg-[#E6DDFB] dark:bg-[#3A2F66]",
+  butter: "bg-[#FFF1C2] dark:bg-[#4A4122]",
+};
+
+const OK_TONES = ["mint", "sky", "lilac", "surface"];
+
+const MUTED = "text-[#6B6885] dark:text-[#A9A5C7]";
+const GOOD = "text-[#0F7A5F] dark:text-[#6FE3C0]";
+const BAD = "text-[#C2263A] dark:text-[#FF8A93]";
+const WARN = "text-[#8A5A00] dark:text-[#F2B33D]";
+
+const FIELD =
+  "w-full rounded-2xl border border-[#E4E0F0] bg-white px-4 py-3 outline-none focus:border-[#E60023] dark:border-[#34305A] dark:bg-[#15132A]";
 
 export default function BudgetsPage() {
   const [transactions, setTransactions] = useState([]);
@@ -184,26 +207,26 @@ export default function BudgetsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B1014] px-5 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-[#F5F3FA] px-5 py-8 text-[#1E1B3A] dark:bg-[#15132A] dark:text-[#F1EFFB] md:px-8">
       <AppNavigation />
 
       <div className="mx-auto max-w-7xl">
         <header className="mb-9 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Link
               href="/"
               aria-label="Back to dashboard"
-              className="rounded-xl border border-white/10 p-2.5 text-gray-300 hover:bg-white/10"
+              className="rounded-full bg-white p-3 text-[#1E1B3A] shadow-sm ring-1 ring-[#E4E0F0] transition hover:scale-105 hover:shadow-md dark:bg-[#201D3D] dark:text-[#F1EFFB] dark:ring-[#34305A]"
             >
               <ArrowLeft size={19} />
             </Link>
 
             <div>
-              <p className="text-sm text-[#83D9B0]">FINTELLIGENCE</p>
-              <h1 className="mt-1 text-2xl font-semibold md:text-3xl">
+              <p className="text-sm font-bold tracking-wide text-[#E60023]">FINTELLIGENCE</p>
+              <h1 className="mt-1 text-3xl font-extrabold tracking-tight md:text-4xl">
                 Budgets & Goals
               </h1>
-              <p className="mt-1 text-sm text-gray-400">
+              <p className={`mt-1 text-sm ${MUTED}`}>
                 Set spending limits and track your progress.
               </p>
             </div>
@@ -211,92 +234,96 @@ export default function BudgetsPage() {
 
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 rounded-xl bg-[#83D9B0] px-4 py-3 font-semibold text-[#0B1014] hover:bg-[#9CE8C5]"
+            className="flex items-center gap-2 rounded-full bg-[#E60023] px-6 py-3 font-bold text-white shadow-sm transition hover:brightness-110"
           >
             <Plus size={18} />
             Set Budget
           </button>
         </header>
 
-        {/* Monthly budget overview */}
-        <section className="mb-6 rounded-2xl border border-white/10 bg-[#121A20] p-5 md:p-6">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm text-gray-400">
-                Monthly Spending Limit
-              </p>
-              <h2 className="mt-1 text-2xl font-semibold">
-                {money(monthlyBudget)}
-              </h2>
+        {/* Pinterest-style masonry board */}
+        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 [&>*]:mb-5 [&>*]:break-inside-avoid">
+          {/* Monthly budget overview */}
+          <section className={`${TILE_BASE} ${TONES.peach}`}>
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <p className={`text-sm font-medium ${MUTED}`}>
+                  Monthly Spending Limit
+                </p>
+                <h2 className="mt-1 text-3xl font-extrabold tracking-tight">
+                  {money(monthlyBudget)}
+                </h2>
+              </div>
+
+              <IconBubble>
+                <Wallet size={22} />
+              </IconBubble>
             </div>
 
-            <Wallet className="text-[#83D9B0]" size={25} />
-          </div>
-
-          <div className="mb-2 flex flex-wrap justify-between gap-2 text-sm">
-            <span className="text-gray-400">
-              Spent: {money(totalSpent)}
-            </span>
-            <span
-              className={
-                monthlyRemaining < 0
-                  ? "text-rose-400"
-                  : "text-[#83D9B0]"
-              }
-            >
-              {monthlyRemaining < 0
-                ? `Over budget: ${money(Math.abs(monthlyRemaining))}`
-                : `Remaining: ${money(monthlyRemaining)}`}
-            </span>
-          </div>
-
-          <div className="h-3 overflow-hidden rounded-full bg-white/10">
-            <div
-              className={`h-full rounded-full transition-all ${
-                monthlyRemaining < 0
-                  ? "bg-rose-400"
-                  : "bg-[#83D9B0]"
-              }`}
-              style={{
-                width: `${Math.min(monthlyPercent, 100)}%`,
-              }}
-            />
-          </div>
-
-          <p className="mt-2 text-xs text-gray-500">
-            {Math.round(monthlyPercent)}% of your monthly limit used.
-            Change this limit in Settings.
-          </p>
-
-          {settings.notifications && monthlyRemaining < 0 && (
-            <div
-              role="status"
-              className="mt-4 flex items-start gap-2 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-300"
-            >
-              <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-              <p>
-                Your monthly spending limit has been exceeded by{" "}
-                {money(Math.abs(monthlyRemaining))}.
-              </p>
+            <div className="mb-2 flex flex-wrap justify-between gap-2 text-sm">
+              <span className={MUTED}>
+                Spent: {money(totalSpent)}
+              </span>
+              <span
+                className={`font-semibold ${
+                  monthlyRemaining < 0 ? BAD : GOOD
+                }`}
+              >
+                {monthlyRemaining < 0
+                  ? `Over budget: ${money(Math.abs(monthlyRemaining))}`
+                  : `Remaining: ${money(monthlyRemaining)}`}
+              </span>
             </div>
-          )}
-        </section>
 
-        {/* Category summary */}
-        <section className="mb-6 grid gap-4 sm:grid-cols-3">
+            <div className="h-3.5 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  monthlyRemaining < 0
+                    ? "bg-[#E8505B]"
+                    : "bg-[#2FBF9B]"
+                }`}
+                style={{
+                  width: `${Math.min(monthlyPercent, 100)}%`,
+                }}
+              />
+            </div>
+
+            <p className={`mt-2 text-xs ${MUTED}`}>
+              {Math.round(monthlyPercent)}% of your monthly limit used.
+              Change this limit in Settings.
+            </p>
+
+            {settings.notifications && monthlyRemaining < 0 && (
+              <div
+                role="status"
+                className={`mt-4 flex items-start gap-2 rounded-2xl bg-white/70 p-3 text-sm font-medium dark:bg-white/10 ${BAD}`}
+              >
+                <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+                <p>
+                  Your monthly spending limit has been exceeded by{" "}
+                  {money(Math.abs(monthlyRemaining))}.
+                </p>
+              </div>
+            )}
+          </section>
+
+          {/* Category summary */}
           <SummaryCard
+            tone="mint"
             title="Total Category Budget"
             amount={money(totalBudget)}
             icon={<Wallet />}
           />
 
           <SummaryCard
+            tone="sky"
             title="Total Expenses"
             amount={money(totalSpent)}
             icon={<Target />}
           />
 
           <SummaryCard
+            tone="butter"
             title="Category Budget Remaining"
             amount={money(totalBudget - budgets.reduce(
               (sum, budget) =>
@@ -308,71 +335,77 @@ export default function BudgetsPage() {
             ))}
             icon={<Target />}
           />
-        </section>
+        </div>
 
-        <section className="rounded-2xl border border-white/10 bg-[#121A20] p-5 md:p-6">
-          <h2 className="mb-1 text-lg font-semibold">
+        <section className="mt-4">
+          <h2 className="mb-1 text-xl font-extrabold tracking-tight">
             Category Budgets
           </h2>
-          <p className="mb-6 text-sm text-gray-400">
+          <p className={`mb-6 text-sm ${MUTED}`}>
             Your spending compared with each category limit.
           </p>
 
           {!loaded ? (
-            <p className="py-10 text-center text-gray-400">
+            <p className={`py-10 text-center ${MUTED}`}>
               Loading...
             </p>
           ) : budgets.length === 0 ? (
-            <div className="py-12 text-center">
+            <div className={`${TILE_BASE} ${TONES.surface} py-12 text-center`}>
               <Target
-                className="mx-auto mb-3 text-gray-500"
+                className={`mx-auto mb-3 ${MUTED}`}
                 size={36}
               />
-              <p className="font-medium">No budgets yet</p>
-              <p className="mt-2 text-sm text-gray-400">
+              <p className="font-bold">No budgets yet</p>
+              <p className={`mt-2 text-sm ${MUTED}`}>
                 Set a category budget to start tracking your spending.
               </p>
 
               <button
                 onClick={() => setShowModal(true)}
-                className="mt-5 rounded-xl bg-[#83D9B0] px-4 py-2.5 font-semibold text-[#0B1014]"
+                className="mt-5 rounded-full bg-[#E60023] px-6 py-3 font-bold text-white transition hover:brightness-110"
               >
                 <Plus size={16} className="mr-1 inline" />
                 Set your first budget
               </button>
             </div>
           ) : (
-            <div className="space-y-6">
-              {budgets.map((budget) => {
+            <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 [&>*]:mb-5 [&>*]:break-inside-avoid">
+              {budgets.map((budget, index) => {
                 const spent = spending[budget.category] || 0;
                 const limit = Number(budget.amount) || 0;
                 const percent = limit > 0 ? (spent / limit) * 100 : 0;
                 const exceeded = spent > limit;
                 const nearLimit = percent >= 80 && !exceeded;
 
+                const tone = exceeded
+                  ? "peach"
+                  : nearLimit
+                    ? "butter"
+                    : OK_TONES[index % OK_TONES.length];
+
                 return (
                   <div
                     key={budget.id}
-                    className="rounded-xl border border-white/10 p-4"
+                    className={`${TILE_BASE} ${TONES[tone]}`}
                   >
-                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-medium">
+                        <h3 className="text-lg font-bold">
                           {budget.category}
                         </h3>
-                        <p className="mt-1 text-sm text-gray-400">
+                        <p className={`mt-1 text-sm ${MUTED}`}>
                           {money(spent)} spent of {money(limit)}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <span
-                          className={`text-sm font-medium ${
+                          className={`text-lg font-extrabold ${
                             exceeded
-                              ? "text-rose-400"
+                              ? BAD
                               : nearLimit
-                                ? "text-amber-300"
-                                : "text-[#83D9B0]"
+                                ? WARN
+                                : GOOD
                           }`}
                         >
                           {Math.round(percent)}%
@@ -380,7 +413,7 @@ export default function BudgetsPage() {
 
                         <button
                           onClick={() => deleteBudget(budget.id)}
-                          className="rounded-lg p-2 text-rose-400 hover:bg-rose-400/10"
+                          className={`rounded-full bg-white/70 p-2 transition hover:scale-105 dark:bg-white/10 ${BAD}`}
                           aria-label={`Delete ${budget.category} budget`}
                         >
                           <Trash2 size={16} />
@@ -388,14 +421,14 @@ export default function BudgetsPage() {
                       </div>
                     </div>
 
-                    <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-3 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
                       <div
                         className={`h-full rounded-full transition-all ${
                           exceeded
-                            ? "bg-rose-400"
+                            ? "bg-[#E8505B]"
                             : nearLimit
-                              ? "bg-amber-300"
-                              : "bg-[#83D9B0]"
+                              ? "bg-[#F2B33D]"
+                              : "bg-[#2FBF9B]"
                         }`}
                         style={{
                           width: `${Math.min(percent, 100)}%`,
@@ -406,7 +439,7 @@ export default function BudgetsPage() {
                     {settings.notifications && exceeded && (
                       <p
                         role="status"
-                        className="mt-3 flex items-center gap-2 text-sm text-rose-400"
+                        className={`mt-3 flex items-center gap-2 text-sm font-medium ${BAD}`}
                       >
                         <AlertTriangle size={16} />
                         Over budget by {money(spent - limit)}.
@@ -414,7 +447,7 @@ export default function BudgetsPage() {
                     )}
 
                     {settings.notifications && nearLimit && (
-                      <p className="mt-3 text-sm text-amber-300">
+                      <p className={`mt-3 text-sm font-medium ${WARN}`}>
                         You have used at least 80% of this budget.
                       </p>
                     )}
@@ -425,7 +458,7 @@ export default function BudgetsPage() {
           )}
         </section>
 
-        <p className="mt-5 text-xs text-gray-500">
+        <p className={`mt-5 text-xs ${MUTED}`}>
           Budgets and transactions are stored locally in this browser.
           Currency changes update the display symbol only; they do not
           convert existing amounts.
@@ -435,22 +468,22 @@ export default function BudgetsPage() {
       {/* Add or update category budget */}
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#1E1B3A]/60 p-4 backdrop-blur-sm"
           onClick={(event) => {
             if (event.target === event.currentTarget) {
               setShowModal(false);
             }
           }}
         >
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#121A20] p-6">
+          <div className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl dark:bg-[#201D3D]">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-extrabold tracking-tight">
                 Set Category Budget
               </h2>
 
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-lg p-2 text-gray-400 hover:bg-white/10"
+                className="rounded-full bg-[#F5F3FA] p-2 transition hover:scale-105 dark:bg-white/10"
                 aria-label="Close"
               >
                 <X size={20} />
@@ -461,7 +494,7 @@ export default function BudgetsPage() {
               <div>
                 <label
                   htmlFor="budgetCategory"
-                  className="mb-2 block text-sm text-gray-300"
+                  className="mb-2 block text-sm font-semibold"
                 >
                   Category
                 </label>
@@ -475,7 +508,7 @@ export default function BudgetsPage() {
                       category: event.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
+                  className={FIELD}
                 >
                   {categories.map((category) => (
                     <option key={category} value={category}>
@@ -488,7 +521,7 @@ export default function BudgetsPage() {
               <div>
                 <label
                   htmlFor="budgetAmount"
-                  className="mb-2 block text-sm text-gray-300"
+                  className="mb-2 block text-sm font-semibold"
                 >
                   Monthly Limit ({currencySymbol})
                 </label>
@@ -507,13 +540,13 @@ export default function BudgetsPage() {
                     })
                   }
                   placeholder="e.g. 5000"
-                  className="w-full rounded-xl border border-white/10 bg-[#0B1014] px-4 py-3 outline-none focus:border-[#83D9B0]"
+                  className={FIELD}
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-[#83D9B0] py-3 font-semibold text-[#0B1014] hover:bg-[#9CE8C5]"
+                className="w-full rounded-full bg-[#E60023] py-3 font-bold text-white transition hover:brightness-110"
               >
                 Save Budget
               </button>
@@ -525,14 +558,22 @@ export default function BudgetsPage() {
   );
 }
 
-function SummaryCard({ title, amount, icon }) {
+function IconBubble({ children }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#121A20] p-5">
+    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/70 text-[#1E1B3A] shadow-sm dark:bg-white/10 dark:text-[#F1EFFB]">
+      {children}
+    </span>
+  );
+}
+
+function SummaryCard({ tone, title, amount, icon }) {
+  return (
+    <div className={`${TILE_BASE} ${TONES[tone]}`}>
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-400">{title}</p>
-        <span className="text-[#83D9B0]">{icon}</span>
+        <p className={`text-sm font-medium ${MUTED}`}>{title}</p>
+        <IconBubble>{icon}</IconBubble>
       </div>
-      <h2 className="mt-4 text-2xl font-semibold">{amount}</h2>
+      <h2 className="mt-4 text-3xl font-extrabold tracking-tight">{amount}</h2>
     </div>
   );
 }
